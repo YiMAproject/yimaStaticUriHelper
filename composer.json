@@ -1,0 +1,41 @@
+{
+    "name": "rayamedia/yima-static-uri-helper",
+    "type": "yima-core-module",
+    "description": "View Helper to define configurable and on-demand statics uri to loading file assets or generating dynamic links.",
+    "keywords": [
+        "assets",
+        "statics",
+        "zf2 module",
+        "zf2",
+        "yima",
+        "raya media"
+    ],
+    "authors": [
+        {
+            "name": "Payam Naderi",
+            "email": "naderi.payam@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "rayamedia/yima-plugin-installer": "dev-master"
+    },
+    "extra": {
+        "yima-plugin-name": "yimaStaticUriHelper"
+    },
+    "autoload" : {
+        "psr-0" : {
+            "yimaStaticUriHelper\\" : "src/"
+        },
+        "classmap" : [
+            "./Module.php"
+        ]
+    },
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.raya-media.com/"
+        }
+    ]
+}
