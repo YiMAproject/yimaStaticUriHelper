@@ -29,6 +29,13 @@ Modules that need some assets can use a key for asset and url for source.
 
  ```
 
+#### Stored Key Path
+ ```php
+ echo $this->staticUri('Twitter.Bootstrap');
+ // output: //cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.0/js/bootstrap.min.js
+
+ ```
+
 #### Default Stored Key Path
  ```php
  echo $this->staticUri('basepath');  // output in exp.: /app_dir
@@ -47,6 +54,9 @@ Modules that need some assets can use a key for asset and url for source.
  ```
 
 #### Generate Dynamic Uri With Default Values
+
+```$basepath`` and ```$serverurl``` are default values.
+
  ```php
  $siteUser = 'payam';
  $this->staticUri('self')
@@ -58,6 +68,7 @@ Modules that need some assets can use a key for asset and url for source.
     '$basepath/www/$user/some/$folder',
     array('folder' => 'media')
  );
+ // output: /app_dir/www/payam/media
 
  ```
 
