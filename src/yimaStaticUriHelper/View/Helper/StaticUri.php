@@ -44,6 +44,12 @@ class StaticUri extends AbstractViewHelper
      */
     protected $lastInvokedUri;
 
+    /**
+     * Some default variables that can placed inside uri's
+     *
+     * @var
+     */
+    protected $variables = array();
 
     /**
      * Constructor
@@ -57,6 +63,16 @@ class StaticUri extends AbstractViewHelper
         }
     }
 
+    /**
+     * Call as functor
+     *
+     * usage:
+     * ----------------------------------
+     * staticUri();
+     * staticUri('self'); return self object
+     *
+     * @return $this|mixed|string
+     */
     public function __invoke()
     {
         if (! $this->initialized) {
@@ -85,7 +101,7 @@ class StaticUri extends AbstractViewHelper
 
         $assembledUri = call_user_func_array(
             array($this, 'assembleUri'),
-            array_merge(array($uri),$funcArgs) // we want uri as first argument
+            array_merge(array($uri), $funcArgs) // we want uri as first argument
         );
 
         $assembledUri = rtrim($assembledUri, '/');
@@ -106,7 +122,7 @@ class StaticUri extends AbstractViewHelper
     protected function init()
     {
         // in construct we don`t have injected methods from view HelperPluginManager yet!!
-        $this->setDefaultPaths();
+        $this->setDefaults();
 
         // default uri is BasePath
         $this->lastInvokedUri = $this->assembleUri(
@@ -116,6 +132,22 @@ class StaticUri extends AbstractViewHelper
         $this->initialized = true;
     }
 
+    /**
+     * Assemble Uri
+     *
+     * usage:
+     * -------------------
+     * assembleUri($uri);
+     * assembleUri($uri, array('variable' => 'value'));
+     *
+     * // default class values not working here
+     * assembleUri('var1/var2/var3', $var1, $var2, $var3);
+     *
+     * @param string $uri Uri or Registered Path
+     *
+     * @return mixed
+     * @throws \Exception
+     */
     public function assembleUri($uri)
     {
         $args = func_get_args();
@@ -126,14 +158,31 @@ class StaticUri extends AbstractViewHelper
         $isKV = false;
         if (!empty($args)) {
             if (is_array($args[0])) {
-                // variables posted in form of key=>value array in sec. argument
+                // variables posted in form of key => value array in sec. argument
                 $vars = $args[0];
+
                 $isKV = true;
             } else {
                 // value posted by argument order, exp. (uri, v1, v2, v3, ....)
                 $vars = $args;
             }
         }
+
+        $self = $this;
+        $vars = ($isKV) ? array_merge($this->getVariables(), $vars)
+            : (
+                (empty($vars))
+                    // we use default values
+                    ? call_user_func(
+                        function() use ($self, &$isKV) {
+                            $isKV = true;
+
+                            return $self->getVariables();
+                        }
+                      )
+                    // we have ordered arguments and can't use default variables here
+                    : $vars
+            );
 
         // get variables from uri
         $matches = array();
@@ -145,8 +194,9 @@ class StaticUri extends AbstractViewHelper
          */
         preg_match_all('/\$(\w[\w\d]*)/', $uri, $matches);
 
-        if (count($matches[0]) != count($vars)) {
-            throw new \Exception('Uri values does not match.');
+        if (count($matches[0]) === 0) {
+            // we don't have any variable in uri
+            return $uri;
         }
 
         if ($isKV) {
@@ -154,7 +204,9 @@ class StaticUri extends AbstractViewHelper
             // 'path' => 'ValuablePath' TO 0 => 'ValuablePath'
             foreach ($matches[1] as $i => $v) {
                 if (! isset($vars[$v])) {
-                    throw new \Exception(sprintf('Value of variable "%s" not found.', $v));
+                    throw new \Exception(
+                        sprintf('Value of variable "%s" not found.', $v)
+                    );
                 }
 
                 $vars[$i] = $vars[$v];
@@ -203,8 +255,7 @@ class StaticUri extends AbstractViewHelper
      */
     public function setPaths(array $pathNames)
     {
-        foreach ($pathNames as $name => $uri)
-        {
+        foreach ($pathNames as $name => $uri) {
             $this->setPath($name, $uri);
         }
 
@@ -222,8 +273,7 @@ class StaticUri extends AbstractViewHelper
      */
     public function setPath($name, $uri)
     {
-        if ($this->hasPath($name) && !$this->isAllowOverride())
-        {
+        if ($this->hasPath($name) && !$this->isAllowOverride()) {
             throw new \Exception(
                 sprintf('Path with name "%s" already exists and class not allow override it.', $name)
             );
@@ -280,6 +330,44 @@ class StaticUri extends AbstractViewHelper
     }
 
     /**
+     * Set Variable that replaced in uri's
+     *
+     * @param $var
+     *
+     * @param $value
+     */
+    public function setVariable($var, $value)
+    {
+        $var = ltrim($var, '$');
+
+        $this->variables[$var] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Get variable
+     *
+     * @param string $var Name of variable
+     *
+     * @return null
+     */
+    public function getVariable($var)
+    {
+        return (isset($this->variables[$var])) ? $this->variables[$var] : null;
+    }
+
+    /**
+     * Get registered variables
+     *
+     * @return array
+     */
+    public function getVariables()
+    {
+        return $this->variables;
+    }
+
+    /**
      * Normalize path names for storing
      *
      * @param $name
@@ -324,7 +412,25 @@ class StaticUri extends AbstractViewHelper
     // ------
 
     /**
-     * Set reserved and default path names
+     * Set defaults for class
+     */
+    protected function setDefaults()
+    {
+        $this->setDefaultPaths();
+        $this->setDefaultVariables();
+    }
+
+    /**
+     * Set default variables
+     */
+    protected function setDefaultVariables()
+    {
+        $this->setVariable('basepath', $this->getBasePath());
+        $this->setVariable('serverurl', $this->getServerUrl());
+    }
+
+    /**
+     * Set reserved default path names
      *
      */
     protected function setDefaultPaths()

@@ -55,7 +55,7 @@ Modules that need some assets can use a key for asset and url for source.
 
 #### Generate Dynamic Uri With Default Values
 
-```$basepath`` and ```$serverurl``` are default values.
+```$basepath``` and ```$serverurl``` are default values.
 
  ```php
  $siteUser = 'payam';
@@ -68,7 +68,23 @@ Modules that need some assets can use a key for asset and url for source.
     '$basepath/www/$user/some/$folder',
     array('folder' => 'media')
  );
- // output: /app_dir/www/payam/media
+ // output: /app_dir/www/payam/some/media
+
+ echo $this->staticUri(
+     '$basepath/www/$user/some/$folder',
+     array('basepath' => '/alterpath', 'folder' => 'media')
+  );
+ // output: /alterpath/www/payam/some/media
+
+
+ /* Pass variables by order
+  * in this format helper don't support default variables
+  */
+ echo $this->staticUri(
+     '$var1/www/$var2/some/$var3',
+     '/alterpath', $user, $media
+  );
+ // output: /alterpath/www/payam/some/media
 
  ```
 
