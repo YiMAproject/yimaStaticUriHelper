@@ -121,6 +121,12 @@ class StaticUri extends AbstractViewHelper
      */
     protected function init()
     {
+        if ($this->initialized) {
+            return;
+        }
+
+        $this->initialized = true;
+
         // in construct we don`t have injected methods from view HelperPluginManager yet!!
         $this->setDefaults();
 
@@ -128,8 +134,6 @@ class StaticUri extends AbstractViewHelper
         $this->lastInvokedUri = $this->assembleUri(
             $this->getPath(self::PATH_BASE_PATH)
         );
-
-        $this->initialized = true;
     }
 
     /**
