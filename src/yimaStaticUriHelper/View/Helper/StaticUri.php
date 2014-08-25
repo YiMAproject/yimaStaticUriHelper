@@ -409,6 +409,8 @@ class StaticUri extends AbstractViewHelper
     protected function getServerUrl()
     {
         $serverUrl = $this->getView()->serverurl();
+        if (empty($serverUrl))
+            throw new \Exception('ServerUrl from View Helper Returned as Empty and it can`t be.');
 
         return $serverUrl;
     }
@@ -439,18 +441,14 @@ class StaticUri extends AbstractViewHelper
      */
     protected function setDefaultPaths()
     {
-        if ($this->getBasePath()) {
-            $this->setPath(
-                self::PATH_BASE_PATH,
-                $this->getBasePath()
-            );
-        }
+        $this->setPath(
+            self::PATH_BASE_PATH,
+            $this->getBasePath()
+        );
 
-        if ($this->getServerUrl()) {
-            $this->setPath(
-                self::PATH_SERVER_URL,
-                $this->getServerUrl()
-            );
-        }
+        $this->setPath(
+            self::PATH_SERVER_URL,
+            $this->getServerUrl()
+        );
     }
 }
