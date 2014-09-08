@@ -31,11 +31,5 @@
             "./Module.php"
         ]
     },
-    "minimum-stability": "dev",
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "http://packages.raya-media.com/"
-        }
-    ]
+    "minimum-stability": "dev"
 }
