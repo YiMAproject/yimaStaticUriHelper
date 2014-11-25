@@ -33,11 +33,11 @@ class Module implements
      */
     public function getViewHelperConfig()
     {
-        /*return array(
-            'factories' => array(
-                'staticsUri' => __NAMESPACE__.'/View/Helper/StaticUriHelperFactory'
+        return array(
+            'invokables' => array(
+                'staticsUri' => __NAMESPACE__.'\View\Helper\StaticUriHelper',
             ),
-        );*/
+        );
     }
 
     /**
