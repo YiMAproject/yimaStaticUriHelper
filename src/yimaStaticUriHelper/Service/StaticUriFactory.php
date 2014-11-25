@@ -30,11 +30,11 @@ class StaticUriFactory implements FactoryInterface
         $basePath  = $viewHelperManager->get('basepath');
         $serverUrl = $viewHelperManager->get('serverurl');
 
-        ($stServer->getVariable($stServer::PATH_BASE_PATH))
-            ?: $stServer->setVariable($stServer::PATH_BASE_PATH, $basePath());
+        ($stServer->getVariable($stServer::VAR_BASE_PATH))
+            ?: $stServer->setVariable($stServer::VAR_BASE_PATH, $basePath());
 
-        ($stServer->getVariable($stServer::PATH_SERVER_URL))
-            ?: $stServer->setVariable($stServer::PATH_SERVER_URL, $serverUrl());
+        ($stServer->getVariable($stServer::VAR_SERVER_URL))
+            ?: $stServer->setVariable($stServer::VAR_SERVER_URL, $serverUrl());
 
         return $stServer;
     }
