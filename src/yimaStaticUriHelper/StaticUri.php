@@ -3,9 +3,9 @@ namespace yimaStaticUriHelper;
 
 class StaticUri
 {
-    const PATH_BASE_PATH  = 'basepath';
+    const VAR_BASE_PATH  = 'basepath';
 
-    const PATH_SERVER_URL = 'serverurl';
+    const VAR_SERVER_URL = 'serverurl';
 
     /**
      * key value of paths name and uri
@@ -79,6 +79,7 @@ class StaticUri
      * usage:
      * ----------------------------------
      * staticUri();
+     * staticUri('pathname');
      * staticUri('self'); return self object
      *
      * @return $this|mixed|string
@@ -137,9 +138,11 @@ class StaticUri
 
         $this->initialized = true;
 
+        $this->setDefaultPaths();
+
         // default uri is BasePath
         $this->lastInvokedUri = $this->assembleUri(
-            $this->getPath(self::PATH_BASE_PATH)
+            $this->getPath(self::VAR_BASE_PATH)
         );
     }
 
@@ -425,7 +428,7 @@ class StaticUri
      */
     public function getBasePath()
     {
-        $basepath =  $this->getVariable(self::PATH_BASE_PATH);
+        $basepath =  $this->getVariable(self::VAR_BASE_PATH);
         if ($basepath === null)
             throw new \Exception('Basepath Not Set Yet!');
 
@@ -442,10 +445,47 @@ class StaticUri
      */
     public function getServerUrl()
     {
-        $serverUrl = $this->getVariable(self::PATH_SERVER_URL);
+        $serverUrl = $this->getVariable(self::VAR_SERVER_URL);
         if (empty($serverUrl))
             throw new \Exception('ServerUrl Returned Empty Value.');
 
         return $serverUrl;
+    }
+
+    // ------
+
+    /**
+     * Set defaults for class
+     */
+    protected function setDefaults()
+    {
+        $this->setDefaultPaths();
+//        $this->setDefaultVariables();
+    }
+
+    /**
+     * Set default variables
+     */
+    /*protected function setDefaultVariables()
+    {
+        $this->setVariable(self::VAR_BASE_PATH, $this->getBasePath());
+        $this->setVariable(self::VAR_SERVER_URL, $this->getServerUrl());
+    }*/
+
+    /**
+     * Set reserved default path names
+     *
+     */
+    protected function setDefaultPaths()
+    {
+        $this->setPath(
+            self::VAR_BASE_PATH,
+            '$'.self::VAR_BASE_PATH
+        );
+
+        $this->setPath(
+            self::VAR_SERVER_URL,
+            '$'.self::VAR_SERVER_URL
+        );
     }
 }
