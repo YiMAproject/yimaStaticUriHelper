@@ -1,9 +1,7 @@
 <?php
-namespace yimaStaticUriHelper\View\Helper;
+namespace yimaStaticUriHelper;
 
-use Zend\View\Helper\AbstractHelper as AbstractViewHelper;
-
-class StaticUri extends AbstractViewHelper
+class StaticUri
 {
     const PATH_BASE_PATH  = 'basepath';
 
@@ -52,15 +50,27 @@ class StaticUri extends AbstractViewHelper
     protected $variables = array();
 
     /**
-     * Constructor
+     * Constructor Setter
      *
-     * @param array $pathNames Path names key/value pair
+     * @param array $options Setter key/value pair include setterMethod-
+     *                       option and arguments
      */
-    public function __construct($pathNames = array())
+    public function __construct($options = array())
     {
-        if (!empty($pathNames)) {
-            $this->setPaths($pathNames);
-        }
+        if (!empty($options))
+            foreach ($options as $method => $arg) {
+                $setter = 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $method)));
+                if (method_exists($this, $setter)) {
+                    $this->{$setter}($arg);
+                } else {
+                    throw new \InvalidArgumentException(
+                        sprintf(
+                            'The option "%s" does not have a matching %s setter method',
+                            $method, $setter
+                        )
+                    );
+                }
+            }
     }
 
     /**
@@ -127,9 +137,6 @@ class StaticUri extends AbstractViewHelper
 
         $this->initialized = true;
 
-        // in construct we don`t have injected methods from view HelperPluginManager yet!!
-        $this->setDefaults();
-
         // default uri is BasePath
         $this->lastInvokedUri = $this->assembleUri(
             $this->getPath(self::PATH_BASE_PATH)
@@ -175,17 +182,17 @@ class StaticUri extends AbstractViewHelper
         $self = $this;
         $vars = ($isKV) ? array_merge($this->getVariables(), $vars)
             : (
-                (empty($vars))
-                    // we use default values
-                    ? call_user_func(
-                        function() use ($self, &$isKV) {
-                            $isKV = true;
+            (empty($vars))
+                // we use default values
+                ? call_user_func(
+                function() use ($self, &$isKV) {
+                    $isKV = true;
 
-                            return $self->getVariables();
-                        }
-                      )
-                    // we have ordered arguments and can't use default variables here
-                    : $vars
+                    return $self->getVariables();
+                }
+            )
+                // we have ordered arguments and can't use default variables here
+                : $vars
             );
 
         // get variables from uri
@@ -255,10 +262,15 @@ class StaticUri extends AbstractViewHelper
      *
      * @param array $pathNames
      *
+     * @throws \Exception
      * @return $this
      */
     public function setPaths(array $pathNames)
     {
+        if (!empty($pathNames) && array_values($pathNames) == $pathNames)
+            throw new \Exception('Variable Arrays Must Be Associated.');
+
+
         foreach ($pathNames as $name => $uri) {
             $this->setPath($name, $uri);
         }
@@ -339,12 +351,32 @@ class StaticUri extends AbstractViewHelper
      * @param $var
      *
      * @param $value
+     * @return $this
      */
     public function setVariable($var, $value)
     {
         $var = ltrim($var, '$');
 
         $this->variables[$var] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Set Variables
+     *
+     * @param array $variables Variables
+     *
+     * @return $this
+     * @throws \Exception
+     */
+    public function setVariables(array $variables)
+    {
+        if (!empty($variables) && array_values($variables) == $variables)
+            throw new \Exception('Variable Arrays Must Be Associated.');
+
+        foreach($variables as $var => $val)
+            $this->setVariable($var, $val);
 
         return $this;
     }
@@ -386,17 +418,18 @@ class StaticUri extends AbstractViewHelper
     // ------
 
     /**
-     * Get basePath from view helper
+     * Get basePath
      *
-     * must same as view helper, we don`t want "hardambil"
-     *
-     * @return mixed
+     * @throws \Exception
+     * @return string
      */
-    protected function getBasePath()
+    public function getBasePath()
     {
-        $basePath = $this->getView()->basepath();
+        $basepath =  $this->getVariable(self::PATH_BASE_PATH);
+        if ($basepath === null)
+            throw new \Exception('Basepath Not Set Yet!');
 
-        return $basePath;
+        return $basepath;
     }
 
     /**
@@ -404,51 +437,15 @@ class StaticUri extends AbstractViewHelper
      *
      * must same as view serverUrl
      *
-     * @return mixed
+     * @throws \Exception
+     * @return string
      */
-    protected function getServerUrl()
+    public function getServerUrl()
     {
-        $serverUrl = $this->getView()->serverurl();
+        $serverUrl = $this->getVariable(self::PATH_SERVER_URL);
         if (empty($serverUrl))
-            throw new \Exception('ServerUrl from View Helper Returned as Empty and it can`t be.');
+            throw new \Exception('ServerUrl Returned Empty Value.');
 
         return $serverUrl;
-    }
-
-    // ------
-
-    /**
-     * Set defaults for class
-     */
-    protected function setDefaults()
-    {
-        $this->setDefaultPaths();
-        $this->setDefaultVariables();
-    }
-
-    /**
-     * Set default variables
-     */
-    protected function setDefaultVariables()
-    {
-        $this->setVariable('basepath', $this->getBasePath());
-        $this->setVariable('serverurl', $this->getServerUrl());
-    }
-
-    /**
-     * Set reserved default path names
-     *
-     */
-    protected function setDefaultPaths()
-    {
-        $this->setPath(
-            self::PATH_BASE_PATH,
-            $this->getBasePath()
-        );
-
-        $this->setPath(
-            self::PATH_SERVER_URL,
-            $this->getServerUrl()
-        );
     }
 }

@@ -3,13 +3,28 @@ namespace yimaStaticUriHelper;
 
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\Feature\ServiceProviderInterface;
 use Zend\ModuleManager\Feature\ViewHelperProviderInterface;
 
 class Module implements
+    ServiceProviderInterface,
     ConfigProviderInterface,
     ViewHelperProviderInterface,
     AutoloaderProviderInterface
 {
+    /**
+     * @inheritdoc
+     *
+     */
+    public function getServiceConfig()
+    {
+        return array(
+            'factories' => array(
+                'staticsUri' => __NAMESPACE__.'\Service\StaticUriFactory'
+            ),
+        );
+    }
+
     /**
      * Expected to return \Zend\ServiceManager\Config object or array to
      * seed such an object.
@@ -18,11 +33,11 @@ class Module implements
      */
     public function getViewHelperConfig()
     {
-        return array(
-            'factories' => array (
-                'staticUri' => __NAMESPACE__.'\View\Helper\StaticUriHelperFactory',
+        /*return array(
+            'factories' => array(
+                'staticsUri' => __NAMESPACE__.'/View/Helper/StaticUriHelperFactory'
             ),
-        );
+        );*/
     }
 
     /**
