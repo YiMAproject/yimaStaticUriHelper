@@ -25,6 +25,17 @@ class StaticUriFactory implements FactoryInterface
 
         $stServer = new StaticUri($conf);
 
+        // Set default variables
+        $viewHelperManager = $serviceLocator->get('ViewHelperManager');
+        $basePath  = $viewHelperManager->get('basepath');
+        $serverUrl = $viewHelperManager->get('serverurl');
+
+        ($stServer->getVariable($stServer::PATH_BASE_PATH))
+            ?: $stServer->setVariable($stServer::PATH_BASE_PATH, $basePath());
+
+        ($stServer->getVariable($stServer::PATH_SERVER_URL))
+            ?: $stServer->setVariable($stServer::PATH_SERVER_URL, $serverUrl());
+
         return $stServer;
     }
 }
