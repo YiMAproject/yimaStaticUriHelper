@@ -3,26 +3,35 @@ namespace yimaStaticUriHelper;
 
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\Feature\InitProviderInterface;
 use Zend\ModuleManager\Feature\ServiceProviderInterface;
 use Zend\ModuleManager\Feature\ViewHelperProviderInterface;
+use Zend\ModuleManager\ModuleManagerInterface;
+use Zend\ServiceManager\ServiceManager;
 
 class Module implements
-    ServiceProviderInterface,
+    InitProviderInterface,
     ConfigProviderInterface,
     ViewHelperProviderInterface,
     AutoloaderProviderInterface
 {
     /**
-     * @inheritdoc
+     * Initialize workflow
      *
+     * @param ModuleManagerInterface $moduleModuleManager
+     *
+     * @return void
      */
-    public function getServiceConfig()
+    public function init(ModuleManagerInterface $moduleModuleManager)
     {
-        return array(
-            'factories' => array(
-                'staticsUri' => __NAMESPACE__.'\Service\StaticUriFactory'
-            ),
-        );
+        /** @var $moduleModuleManager \Zend\ModuleManager\ModuleManager */
+
+        /** @var \Zend\ModuleManager\ModuleEvent $event */
+        $event = $moduleModuleManager->getEvent();
+        /** @var ServiceManager $sm */
+        $sm    = $event->getParam('ServiceManager');
+        $sm->setFactory('staticsUri', __NAMESPACE__.'\Service\StaticUriFactory');
+        $sm->setShared('staticsUri', false);
     }
 
     /**
