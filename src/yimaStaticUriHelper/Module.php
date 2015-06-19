@@ -31,7 +31,7 @@ class Module implements
         /** @var ServiceManager $sm */
         $sm    = $event->getParam('ServiceManager');
         $sm->setFactory('staticsUri', __NAMESPACE__.'\Service\StaticUriFactory');
-        $sm->setShared('staticsUri', false);
+        $sm->setShared('staticsUri', true);
     }
 
     /**
