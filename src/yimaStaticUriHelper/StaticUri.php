@@ -98,21 +98,19 @@ class StaticUri
 
         $pathName = array_shift($funcArgs);
 
-        if (strtolower($pathName) === 'self') {
+        if (strtolower($pathName) === 'self')
             // return self
             return $this;
-        }
 
-        if ($this->hasPath($pathName)) {
+        if ($this->hasPath($pathName))
             $uri = $this->getPath($pathName);
-        } else {
+        else
             // we don't have pathName, assume that entered text is uri
             $uri = $pathName;
-        }
 
         $assembledUri = call_user_func_array(
-            array($this, 'assembleUri'),
-            array_merge(array($uri), $funcArgs) // we want uri as first argument
+            [$this, 'assembleUri']
+            , array_merge([$uri], $funcArgs) // we want uri as first argument
         );
 
         $assembledUri = rtrim($assembledUri, '/');
@@ -168,14 +166,19 @@ class StaticUri
         array_shift($args); // drop out uri from arguments cause we have it
 
         // get function argument vars
-        $vars = array();
+        $vars = [];
         $isKV = false;
+
         if (!empty($args)) {
             if (is_array($args[0])) {
-                // variables posted in form of key => value array in sec. argument
-                $vars = $args[0];
-
-                $isKV = true;
+                if (array_values($args[0]) === $args[0])
+                    // this is not associated array
+                    $vars = $args[0];
+                else {
+                    // variables posted in form of key => value array
+                    $vars = $args[0];
+                    $isKV = true;
+                }
             } else {
                 // value posted by argument order, exp. (uri, v1, v2, v3, ....)
                 $vars = $args;
